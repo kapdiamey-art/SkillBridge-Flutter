@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
         
         return Scaffold(
           appBar: AppBar(
-            title: const Text("SkillBridge"),
+            title: const Text("Career Compass"),
             actions: const [
               ThemeToggle(),
               SizedBox(width: 8),

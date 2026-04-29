@@ -19,20 +19,20 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AppStateProvider()),
       ],
-      child: const SkillBridgeApp(),
+      child: const CareerCompassApp(),
     ),
   );
 }
 
-class SkillBridgeApp extends StatelessWidget {
-  const SkillBridgeApp({super.key});
+class CareerCompassApp extends StatelessWidget {
+  const CareerCompassApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppStateProvider>(
       builder: (context, state, _) {
         return MaterialApp(
-          title: 'SkillBridge',
+          title: 'Career Compass',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.theme(false),
           darkTheme: AppTheme.theme(true),

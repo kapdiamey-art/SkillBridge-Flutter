@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
               _buildLogo(),
               const SizedBox(height: 40),
               Text(
-                "Welcome Back",
+                "Career Compass",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Sign in to continue your career journey",
+                "Your premium companion for professional growth",
                 style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 16),
               ),
               const SizedBox(height: 40),
@@ -84,13 +84,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLogo() {
     return Container(
-      width: 60,
-      height: 60,
+      width: 70,
+      height: 70,
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryBlue.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: const Icon(Icons.auto_awesome, color: Colors.white, size: 30),
+      child: const Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(Icons.explore_outlined, color: Colors.white, size: 40),
+          Positioned(
+            top: 15,
+            right: 15,
+            child: Icon(Icons.auto_awesome, color: Colors.white70, size: 12),
+          ),
+        ],
+      ),
     );
   }
 
