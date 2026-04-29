@@ -6,6 +6,8 @@ import '../../../data/providers/app_state_provider.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/theme_toggle.dart';
 import '../quiz/quiz_screen.dart';
+import '../resume/resume_analyzer_screen.dart';
+import '../common/dummy_feature_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -38,6 +40,8 @@ class HomeScreen extends StatelessWidget {
                 _buildWelcomeHeader(state, isDark),
                 const SizedBox(height: 30),
                 _buildReadinessCard(state, isDark),
+                const SizedBox(height: 30),
+                _buildSkillGapSummary(state, isDark),
                 const SizedBox(height: 30),
                 _buildInsightsSection(isDark),
                 const SizedBox(height: 30),
@@ -89,15 +93,9 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Career Readiness Score",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary(isDark)),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Based on skills, quiz results, and activity progress.",
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isDark)),
-                ),
+                Text("Career Readiness", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textPrimary(isDark))),
+                const SizedBox(height: 4),
+                Text("Based on your latest skills & quizzes.", style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isDark))),
               ],
             ),
           ),
@@ -121,11 +119,49 @@ class HomeScreen extends StatelessWidget {
             strokeCap: StrokeCap.round,
           ),
         ),
-        Text(
-          "${score.toInt()}",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary(isDark)),
+        Text("${score.toInt()}", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary(isDark))),
+      ],
+    );
+  }
+
+  Widget _buildSkillGapSummary(AppStateProvider state, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Skill Gap Summary", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.cardBg(isDark),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.borderColor(isDark)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Top missing skills for 'Product Designer':", style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 13)),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                children: [
+                  _buildMissingSkillTag("User Research", isDark),
+                  _buildMissingSkillTag("Figma Pro", isDark),
+                  _buildMissingSkillTag("A/B Testing", isDark),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMissingSkillTag(String label, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.red.withOpacity(0.2))),
+      child: Text(label, style: const TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.bold)),
     );
   }
 
@@ -133,22 +169,22 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Weekly AI Insights", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+        Text("AI Insights", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.primaryBlue.withOpacity(0.1),
+            color: AppColors.primaryPurple.withOpacity(0.05),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+            border: Border.all(color: AppColors.primaryPurple.withOpacity(0.1)),
           ),
           child: Row(
             children: [
-              const Icon(LucideIcons.zap, color: AppColors.primaryBlue, size: 20),
+              const Icon(LucideIcons.sparkles, color: AppColors.primaryPurple, size: 20),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  "You improved faster than 68% of users this week. Focus on SQL to unlock 5 new roles.",
+                  "Users with 'Figma' skills are seeing 40% higher match scores this week.",
                   style: TextStyle(color: AppColors.textPrimary(isDark), fontSize: 14),
                 ),
               ),
@@ -160,19 +196,30 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildQuickActions(BuildContext context, bool isDark) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _buildActionBtn(LucideIcons.helpCircle, "Take Quiz", isDark, () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => QuizScreen()));
-        })),
-        const SizedBox(width: 12),
-        Expanded(child: _buildActionBtn(LucideIcons.bookOpen, "Skills", isDark, () {
-          _showDummyDialog(context, "Update Skills", "Skill management will open here.");
-        })),
-        const SizedBox(width: 12),
-        Expanded(child: _buildActionBtn(LucideIcons.map, "Roadmap", isDark, () {
-          _showDummyDialog(context, "Your Roadmap", "Switching to your active learning path.");
-        })),
+        Text("Quick Modules", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _buildActionBtn(LucideIcons.fileSearch, "Resume Analyzer", isDark, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ResumeAnalyzerScreen()));
+            })),
+            const SizedBox(width: 12),
+            Expanded(child: _buildActionBtn(LucideIcons.helpCircle, "Quizzes", isDark, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => QuizScreen()));
+            })),
+            const SizedBox(width: 12),
+            Expanded(child: _buildActionBtn(LucideIcons.users, "Mentorship", isDark, () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const DummyFeatureScreen(
+                title: "Mentorship Engine",
+                description: "Connect with top industry professionals to accelerate your career growth.",
+                icon: LucideIcons.users,
+              )));
+            })),
+          ],
+        ),
       ],
     );
   }
@@ -191,20 +238,9 @@ class HomeScreen extends StatelessWidget {
           children: [
             Icon(icon, color: AppColors.primaryPurple, size: 24),
             const SizedBox(height: 8),
-            Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.textPrimary(isDark))),
+            Text(label, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppColors.textPrimary(isDark))),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showDummyDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
       ),
     );
   }
@@ -213,10 +249,10 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Recent Activity", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+        Text("Recent Progress", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
         const SizedBox(height: 16),
-        _buildActivityTile("Completed Python Quiz", "2 hours ago", LucideIcons.checkCircle, isDark),
-        _buildActivityTile("Added 'React' to skills", "Yesterday", LucideIcons.plusCircle, isDark),
+        _buildActivityTile("Analyzed Resume", "Just now", LucideIcons.fileText, isDark),
+        _buildActivityTile("Completed Skill Gap Check", "2 hours ago", LucideIcons.target, isDark),
       ],
     );
   }
