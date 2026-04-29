@@ -1,83 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/providers/app_state_provider.dart';
-import '../../widgets/glass_card.dart';
+import '../../widgets/theme_toggle.dart';
 
 class ProgressScreen extends StatelessWidget {
   const ProgressScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Your Progress"),
-      ),
-      body: Consumer<AppStateProvider>(
-        builder: (context, state, _) {
-          final roadmap = state.activeRoadmap;
-          final overallProgress = roadmap?.overallProgress ?? 0.0;
-          
-          return SingleChildScrollView(
+    return Consumer<AppStateProvider>(
+      builder: (context, state, _) {
+        final isDark = state.isDarkMode;
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("Your Progress"),
+            actions: const [ThemeToggle(), SizedBox(width: 16)],
+          ),
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildOverviewCard(overallProgress),
+                _buildSummaryHeader(state, isDark),
                 const SizedBox(height: 30),
-                const Text("Skill Growth", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text("Weekly Activity", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
                 const SizedBox(height: 16),
-                _buildGrowthChart(),
+                _buildActivityChart(isDark),
                 const SizedBox(height: 30),
-                const Text("Achievements", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text("Milestones", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
                 const SizedBox(height: 16),
-                _buildAchievementsGrid(),
-                const SizedBox(height: 40),
+                _buildMilestoneList(isDark),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildOverviewCard(double progress) {
-    return GlassCard(
+  Widget _buildSummaryHeader(AppStateProvider state, bool isDark) {
+    return Container(
       padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg(isDark),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderColor(isDark)),
+      ),
       child: Column(
         children: [
-          Stack(
-            alignment: Alignment.center,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: CircularProgressIndicator(
-                  value: progress,
-                  strokeWidth: 10,
-                  backgroundColor: AppColors.surface,
-                  color: AppColors.primaryBlue,
-                ),
-              ),
-              Column(
-                children: [
-                  Text("${(progress * 100).toInt()}%", style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-                  const Text("Done", style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
-                ],
-              ),
+              _buildStat("Tasks", "12/20", LucideIcons.checkSquare, isDark),
+              _buildStat("Quizzes", "4", LucideIcons.helpCircle, isDark),
+              _buildStat("Level", "7", LucideIcons.award, isDark),
             ],
           ),
           const SizedBox(height: 24),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStat("12", "Tasks Done"),
-              Container(width: 1, height: 30, color: Colors.white.withOpacity(0.1)),
-              _buildStat("5", "Badges"),
-              Container(width: 1, height: 30, color: Colors.white.withOpacity(0.1)),
-              _buildStat("3", "Streaks"),
+              const Icon(LucideIcons.trendingUp, color: AppColors.success, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "You are 12% ahead of your schedule this week!",
+                  style: TextStyle(color: AppColors.textPrimary(isDark), fontWeight: FontWeight.w600),
+                ),
+              ),
             ],
           ),
         ],
@@ -85,83 +78,86 @@ class ProgressScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStat(String val, String label) {
+  Widget _buildStat(String label, String value, IconData icon, bool isDark) {
     return Column(
       children: [
-        Text(val, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+        Icon(icon, color: AppColors.primaryPurple, size: 20),
+        const SizedBox(height: 8),
+        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+        Text(label, style: TextStyle(fontSize: 12, color: AppColors.textMuted(isDark))),
       ],
     );
   }
 
-  Widget _buildGrowthChart() {
-    return GlassCard(
+  Widget _buildActivityChart(bool isDark) {
+    return Container(
       height: 200,
-      child: LineChart(
-        LineChartData(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg(isDark),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.borderColor(isDark)),
+      ),
+      child: BarChart(
+        BarChartData(
           gridData: const FlGridData(show: false),
           titlesData: const FlTitlesData(show: false),
           borderData: FlBorderData(show: false),
-          lineBarsData: [
-            LineChartBarData(
-              spots: const [
-                FlSpot(0, 1),
-                FlSpot(1, 1.5),
-                FlSpot(2, 1.4),
-                FlSpot(3, 2.8),
-                FlSpot(4, 3.5),
-                FlSpot(5, 4.2),
-              ],
-              isCurved: true,
-              gradient: const LinearGradient(colors: [AppColors.primaryBlue, AppColors.primaryPurple]),
-              barWidth: 4,
-              dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(
-                show: true,
-                gradient: LinearGradient(
-                  colors: [AppColors.primaryBlue.withOpacity(0.2), Colors.transparent],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
+          barGroups: [
+            _buildBarGroup(0, 8, isDark),
+            _buildBarGroup(1, 10, isDark),
+            _buildBarGroup(2, 14, isDark),
+            _buildBarGroup(3, 12, isDark),
+            _buildBarGroup(4, 18, isDark),
+            _buildBarGroup(5, 15, isDark),
+            _buildBarGroup(6, 9, isDark),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAchievementsGrid() {
-    final achievements = [
-      {'name': 'Early Bird', 'icon': LucideIcons.zap, 'color': Colors.amber},
-      {'name': 'Skill Hunter', 'icon': LucideIcons.target, 'color': Colors.blue},
-      {'name': 'Consistent', 'icon': LucideIcons.calendarCheck, 'color': Colors.green},
-      {'name': 'Top Match', 'icon': LucideIcons.award, 'color': Colors.purple},
-    ];
+  BarChartGroupData _buildBarGroup(int x, double y, bool isDark) {
+    return BarChartGroupData(
+      x: x,
+      barRods: [
+        BarChartRodData(
+          toY: y,
+          gradient: AppColors.primaryGradient,
+          width: 12,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ],
+    );
+  }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 2.5,
+  Widget _buildMilestoneList(bool isDark) {
+    return Column(
+      children: [
+        _buildMilestoneTile("Foundational Skills", "Completed", true, isDark),
+        _buildMilestoneTile("Core Projects", "In Progress", false, isDark),
+        _buildMilestoneTile("Portfolio Ready", "Locked", false, isDark),
+      ],
+    );
+  }
+
+  Widget _buildMilestoneTile(String title, String status, bool isDone, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg(isDark),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderColor(isDark)),
       ),
-      itemCount: achievements.length,
-      itemBuilder: (context, index) {
-        final ach = achievements[index];
-        return GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            children: [
-              Icon(ach['icon'] as IconData, color: ach['color'] as Color, size: 20),
-              const SizedBox(width: 10),
-              Text(ach['name'] as String, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        );
-      },
+      child: Row(
+        children: [
+          Icon(isDone ? LucideIcons.checkCircle2 : LucideIcons.circle, color: isDone ? AppColors.success : AppColors.textMuted(isDark), size: 20),
+          const SizedBox(width: 16),
+          Expanded(child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark)))),
+          Text(status, style: TextStyle(fontSize: 12, color: AppColors.textMuted(isDark))),
+        ],
+      ),
     );
   }
 }

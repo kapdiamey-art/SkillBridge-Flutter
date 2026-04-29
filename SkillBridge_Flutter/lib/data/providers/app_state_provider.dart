@@ -1,22 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 import '../mock/mock_data.dart';
 
 class AppStateProvider extends ChangeNotifier {
-  UserProfile _user = UserProfile();
+  // Theme state
+  bool _isDarkMode = true;
+  bool get isDarkMode => _isDarkMode;
+
+  // Auth state
+  bool _isLoggedIn = false;
+  bool get isLoggedIn => _isLoggedIn;
+
+  // User state
+  UserProfile _user = UserProfile(name: 'Amey');
+  UserProfile get user => _user;
+
+  // Career state
   List<Career> _recommendedCareers = [];
   Career? _selectedCareer;
   CareerRoadmap? _activeRoadmap;
-  List<ChatMessage> _chatMessages = [
-    ChatMessage(text: "Hello! I'm your AI career counsellor. How can I help you today?", isUser: false),
-  ];
+  List<ChatMessage> _chatMessages = [];
 
-  UserProfile get user => _user;
-  List<Career> get recommendedCareers => _recommendedCareers;
+  // New Upgrade features state
+  double _readinessScore = 65.0;
+  double get readinessScore => _readinessScore;
+
+  List<Career> get recommendedCareers => _recommendedCareers.isEmpty ? MockData.careers : _recommendedCareers;
   Career? get selectedCareer => _selectedCareer;
   CareerRoadmap? get activeRoadmap => _activeRoadmap;
   List<ChatMessage> get chatMessages => _chatMessages;
 
+  AppStateProvider() {
+    _loadTheme();
+    _calculateRecommendations();
+  }
+
+  // --- Theme Logic ---
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isDarkMode = prefs.getBool('isDarkMode') ?? true;
+    notifyListeners();
+  }
+
+  void toggleTheme() async {
+    _isDarkMode = !_isDarkMode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', _isDarkMode);
+    notifyListeners();
+  }
+
+  // --- Auth Logic ---
+  void login(String email, String password) {
+    _isLoggedIn = true;
+    notifyListeners();
+  }
+
+  void logout() {
+    _isLoggedIn = false;
+    notifyListeners();
+  }
+
+  // --- Core Logic ---
   void updateBasicInfo(String name, String branch, String year) {
     _user = _user.copyWith(name: name, branch: branch, year: year);
     notifyListeners();
@@ -30,7 +75,23 @@ class AppStateProvider extends ChangeNotifier {
       currentSkills.add(skill);
     }
     _user = _user.copyWith(skills: currentSkills);
+    _calculateReadinessScore();
     _calculateRecommendations();
+    notifyListeners();
+  }
+
+  void _calculateReadinessScore() {
+    // Mock logic: skills + progress
+    double score = 40.0;
+    score += (_user.skills.length * 5);
+    if (_activeRoadmap != null) {
+      score += (_activeRoadmap!.overallProgress * 20);
+    }
+    _readinessScore = score.clamp(0.0, 100.0);
+  }
+
+  void updateScoreAfterQuiz(int score) {
+    _readinessScore = (_readinessScore + score).clamp(0.0, 100.0);
     notifyListeners();
   }
 
@@ -47,51 +108,23 @@ class AppStateProvider extends ChangeNotifier {
 
   void completeOnboarding() {
     _user = _user.copyWith(isOnboardingComplete: true);
-    _calculateRecommendations();
     notifyListeners();
   }
 
   void _calculateRecommendations() {
-    // Simple matching logic: count overlapping skills
-    final List<MapEntry<Career, double>> scores = [];
-
+    // Simple logic: matches by skill count
+    final List<MapEntry<Career, int>> scores = [];
     for (final career in MockData.careers) {
-      int matchCount = 0;
+      int match = 0;
       for (final reqSkill in career.requiredSkills) {
         if (_user.skills.any((s) => s.name.toLowerCase() == reqSkill.toLowerCase())) {
-          matchCount++;
+          match++;
         }
       }
-      double score = (matchCount / career.requiredSkills.length) * 100;
-      // Bonus score if user interests match career title or description
-      for (final interest in _user.interests) {
-        if (career.title.toLowerCase().contains(interest.toLowerCase()) || 
-            career.description.toLowerCase().contains(interest.toLowerCase())) {
-          score += 10;
-        }
-      }
-      scores.add(MapEntry(career, score.clamp(0.0, 100.0)));
+      scores.add(MapEntry(career, match));
     }
-
     scores.sort((a, b) => b.value.compareTo(a.value));
     _recommendedCareers = scores.map((e) => e.key).toList();
-  }
-
-  double getMatchPercentage(Career career) {
-    int matchCount = 0;
-    for (final reqSkill in career.requiredSkills) {
-      if (_user.skills.any((s) => s.name.toLowerCase() == reqSkill.toLowerCase())) {
-        matchCount++;
-      }
-    }
-    double score = (matchCount / career.requiredSkills.length) * 100;
-    for (final interest in _user.interests) {
-      if (career.title.toLowerCase().contains(interest.toLowerCase()) || 
-          career.description.toLowerCase().contains(interest.toLowerCase())) {
-        score += 10;
-      }
-    }
-    return score.clamp(0.0, 100.0);
   }
 
   void selectCareer(Career career) {
@@ -106,7 +139,6 @@ class AppStateProvider extends ChangeNotifier {
 
   void toggleTask(String monthId, String taskId) {
     if (_activeRoadmap == null) return;
-    
     for (var month in _activeRoadmap!.months) {
       for (var task in month.tasks) {
         if (task.id == taskId) {
@@ -115,25 +147,15 @@ class AppStateProvider extends ChangeNotifier {
         }
       }
     }
+    _calculateReadinessScore();
     notifyListeners();
   }
 
   void sendMessage(String text) {
     _chatMessages.add(ChatMessage(text: text, isUser: true));
     notifyListeners();
-
-    // Mock AI response delay
     Future.delayed(const Duration(seconds: 1), () {
-      String response = "That's a great question about ${text.toLowerCase()}. ";
-      if (text.toLowerCase().contains('career') || text.toLowerCase().contains('job')) {
-        response += "Based on your current skills in ${_user.skills.map((s) => s.name).join(', ')}, you might want to look into ${MockData.careers[0].title}.";
-      } else if (text.toLowerCase().contains('skill')) {
-        response += "I recommend checking out the roadmap for ${MockData.careers[1].title} to see which skills you should prioritize next.";
-      } else {
-        response += "I'm here to help you navigate your career path. Would you like to see your top matches or analyze a skill gap?";
-      }
-      
-      _chatMessages.add(ChatMessage(text: response, isUser: false));
+      _chatMessages.add(ChatMessage(text: "That's a great question! Based on your profile, I recommend focusing on Data Structures first.", isUser: false));
       notifyListeners();
     });
   }

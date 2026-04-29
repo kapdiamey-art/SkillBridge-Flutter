@@ -15,15 +15,16 @@ class SkillChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryBlue.withOpacity(0.2) : AppColors.surface,
+          color: isSelected ? AppColors.primaryBlue.withOpacity(0.2) : AppColors.surface(isDark),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primaryBlue : AppColors.textMuted.withOpacity(0.3),
+            color: isSelected ? AppColors.primaryBlue : AppColors.textMuted(isDark).withOpacity(0.3),
             width: 1,
           ),
           gradient: isSelected ? LinearGradient(
@@ -36,7 +37,7 @@ class SkillChip extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected ? Colors.white : AppColors.textSecondary(isDark),
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),

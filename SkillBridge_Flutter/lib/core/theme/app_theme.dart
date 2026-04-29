@@ -3,72 +3,52 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
-  static ThemeData get darkTheme {
+  static ThemeData theme(bool isDark) {
     return ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.background,
+      brightness: isDark ? Brightness.dark : Brightness.light,
+      scaffoldBackgroundColor: AppColors.background(isDark),
       primaryColor: AppColors.primaryBlue,
-      colorScheme: const ColorScheme.dark(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primaryBlue,
+        brightness: isDark ? Brightness.dark : Brightness.light,
         primary: AppColors.primaryBlue,
         secondary: AppColors.primaryPurple,
-        surface: AppColors.surface,
-        background: AppColors.background,
+        surface: AppColors.surface(isDark),
+        background: AppColors.background(isDark),
       ),
       textTheme: GoogleFonts.outfitTextTheme(
-        const TextTheme(
-          displayLarge: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-          displayMedium: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-          bodyLarge: TextStyle(
-            fontSize: 16,
-            color: AppColors.textPrimary,
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+        TextTheme(
+          displayLarge: TextStyle(color: AppColors.textPrimary(isDark)),
+          displayMedium: TextStyle(color: AppColors.textPrimary(isDark)),
+          bodyLarge: TextStyle(color: AppColors.textPrimary(isDark)),
+          bodyMedium: TextStyle(color: AppColors.textSecondary(isDark)),
         ),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.background,
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: AppColors.textPrimary),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.background,
-        selectedItemColor: AppColors.primaryBlue,
-        unselectedItemColor: AppColors.textMuted,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
+        titleTextStyle: TextStyle(
+          color: AppColors.textPrimary(isDark),
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        iconTheme: IconThemeData(color: AppColors.textPrimary(isDark)),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.cardBg,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        color: AppColors.cardBg(isDark),
         elevation: 0,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryBlue,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: GoogleFonts.outfit(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: AppColors.borderColor(isDark), width: 1),
         ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: AppColors.background(isDark),
+        selectedItemColor: AppColors.primaryBlue,
+        unselectedItemColor: AppColors.textMuted(isDark),
+        type: BottomNavigationBarType.fixed,
+        elevation: 10,
       ),
     );
   }

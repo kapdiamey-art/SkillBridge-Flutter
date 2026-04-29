@@ -3,212 +3,205 @@ import 'package:provider/provider.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../data/providers/app_state_provider.dart';
-import '../../widgets/glass_card.dart';
 import '../../widgets/gradient_button.dart';
 
-class CareerDetailScreen extends StatelessWidget {
+class CareerDetailScreen extends StatefulWidget {
   const CareerDetailScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CareerDetailScreen> createState() => _CareerDetailScreenState();
+}
+
+class _CareerDetailScreenState extends State<CareerDetailScreen> {
+  bool _isSimulating = false;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppStateProvider>(
       builder: (context, state, _) {
         final career = state.selectedCareer;
+        final isDark = state.isDarkMode;
+        
         if (career == null) return const Scaffold();
-        final match = state.getMatchPercentage(career);
 
         return Scaffold(
-          body: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                expandedHeight: 200,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: const BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 40),
-                          Text(
-                            "${match.toInt()}%",
-                            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          const Text("Match Score", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                  ),
+          appBar: AppBar(title: Text(career.title)),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMatchHeader(isDark, _isSimulating),
+                const SizedBox(height: 30),
+                _buildSectionTitle("Why this career?", isDark),
+                Text(career.whyThisCareer, style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 15, height: 1.5)),
+                const SizedBox(height: 30),
+                _buildMarketInsights(isDark),
+                const SizedBox(height: 30),
+                _buildWhatIfSimulator(isDark),
+                const SizedBox(height: 30),
+                _buildSectionTitle("Skill Gap Analysis", isDark),
+                _buildSkillList(career, state, isDark),
+                const SizedBox(height: 40),
+                GradientButton(
+                  text: "Generate Roadmap",
+                  onPressed: () {
+                    state.generateRoadmap(career);
+                    Navigator.pop(context);
+                  },
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(career.title, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-                      const SizedBox(height: 12),
-                      _buildSectionTitle("Why this career?"),
-                      Text(career.whyThisCareer, style: const TextStyle(color: AppColors.textSecondary, fontSize: 15, height: 1.5)),
-                      
-                      const SizedBox(height: 30),
-                      _buildSectionTitle("Skill Match Breakdown"),
-                      _buildSkillMatchList(state, career.requiredSkills),
-                      
-                      const SizedBox(height: 30),
-                      _buildSectionTitle("Job Market Insights"),
-                      _buildMarketInsights(career),
-                      
-                      const SizedBox(height: 30),
-                      _buildSectionTitle("Meet Alumni & Mentors"),
-                      _buildMentorsList(career.mentors),
-                      
-                      const SizedBox(height: 30),
-                      _buildSectionTitle("A Day in this Role"),
-                      GlassCard(
-                        child: Text(career.dayInLife, style: const TextStyle(color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
-                      ),
-                      
-                      const SizedBox(height: 40),
-                      GradientButton(
-                        text: "Generate 3-Month Roadmap",
-                        onPressed: () {
-                          state.generateRoadmap(career);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Roadmap generated! Check the Roadmap tab.")),
-                          );
-                          Navigator.pop(context);
-                        },
-                      ),
-                      const SizedBox(height: 40),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+  Widget _buildMatchHeader(bool isDark, bool isSimulating) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          _buildMatchCircle(isSimulating ? 92 : 72),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isSimulating ? "SIMULATED MATCH" : "CURRENT MATCH",
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: Colors.white70),
+                ),
+                const SizedBox(height: 4),
+                const Text("High Alignment", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildSkillMatchList(AppStateProvider state, List<String> required) {
+  Widget _buildMatchCircle(int percent) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: 70,
+          height: 70,
+          child: CircularProgressIndicator(
+            value: percent / 100,
+            strokeWidth: 6,
+            backgroundColor: Colors.white24,
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            strokeCap: StrokeCap.round,
+          ),
+        ),
+        Text("$percent%", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+      ],
+    );
+  }
+
+  Widget _buildMarketInsights(bool isDark) {
     return Column(
-      children: required.map((skill) {
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle("Job Market Insights", isDark),
+        Row(
+          children: [
+            _buildInsightItem("Demand", "High", LucideIcons.trendingUp, isDark, AppColors.success),
+            const SizedBox(width: 12),
+            _buildInsightItem("Salary", "\$90k+", LucideIcons.dollarSign, isDark, AppColors.primaryBlue),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInsightItem(String label, String val, IconData icon, bool isDark, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardBg(isDark),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.borderColor(isDark)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 8),
+            Text(val, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+            Text(label, style: TextStyle(fontSize: 12, color: AppColors.textMuted(isDark))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWhatIfSimulator(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primaryBlue.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primaryBlue.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.flaskConical, color: AppColors.primaryBlue, size: 20),
+              const SizedBox(width: 12),
+              Text("What-if Simulator", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+              const Spacer(),
+              Switch(
+                value: _isSimulating,
+                onChanged: (val) => setState(() => _isSimulating = val),
+                activeColor: AppColors.primaryBlue,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Toggle skills to see how they impact your career trajectory and salary projections.",
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary(isDark)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+    );
+  }
+
+  Widget _buildSkillList(dynamic career, AppStateProvider state, bool isDark) {
+    return Column(
+      children: career.requiredSkills.map<Widget>((skill) {
         final hasSkill = state.user.skills.any((s) => s.name.toLowerCase() == skill.toLowerCase());
         return Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
+          padding: const EdgeInsets.only(bottom: 12.0),
           child: Row(
             children: [
-              Icon(
-                hasSkill ? LucideIcons.checkCircle2 : LucideIcons.circle,
-                size: 18,
-                color: hasSkill ? AppColors.success : AppColors.textMuted,
-              ),
+              Icon(hasSkill ? Icons.check_circle : Icons.circle_outlined, color: hasSkill ? AppColors.success : AppColors.textMuted(isDark), size: 20),
               const SizedBox(width: 12),
-              Text(skill, style: TextStyle(color: hasSkill ? Colors.white : AppColors.textSecondary)),
+              Text(skill, style: TextStyle(color: hasSkill ? AppColors.textPrimary(isDark) : AppColors.textSecondary(isDark))),
               const Spacer(),
               if (!hasSkill)
-                const Text("Gap", style: TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.bold)),
+                TextButton(onPressed: () {}, child: const Text("Learn", style: TextStyle(fontSize: 12))),
             ],
           ),
         );
       }).toList(),
     );
   }
-
-  Widget _buildMarketInsights(dynamic career) {
-    return Row(
-      children: [
-        Expanded(child: _buildInsightCard("Demand", career.demand.name.toUpperCase(), LucideIcons.barChart)),
-        const SizedBox(width: 12),
-        Expanded(child: _buildInsightCard("Salary", career.salaryRange, LucideIcons.dollarSign)),
-      ],
-    );
-  }
-
-  Widget _buildInsightCard(String title, String val, IconData icon) {
-    return GlassCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: AppColors.primaryBlue),
-              const SizedBox(width: 6),
-              Text(title, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(val, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMentorsList(List<dynamic> mentors) {
-    return SizedBox(
-      height: 140,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: mentors.length,
-        itemBuilder: (context, index) {
-          final mentor = mentors[index];
-          return Container(
-            width: 200,
-            margin: const EdgeInsets.only(right: 16),
-            child: GlassCard(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(backgroundImage: NetworkImage(mentor.avatarUrl), radius: 20),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(mentor.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text(mentor.company, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primaryBlue),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                      minimumSize: const Size(double.infinity, 30),
-                    ),
-                    child: const Text("Connect", style: TextStyle(color: AppColors.primaryBlue, fontSize: 12)),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-extension StringExtension on String {
-    String capitalize() {
-      return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
-    }
 }

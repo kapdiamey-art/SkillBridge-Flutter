@@ -4,8 +4,8 @@ import 'home/home_screen.dart';
 import 'explore/explore_screen.dart';
 import 'roadmap/roadmap_screen.dart';
 import 'progress/progress_screen.dart';
-import 'ai_chat/ai_chat_screen.dart';
-import '../../core/theme/app_colors.dart';
+import 'profile/profile_screen.dart';
+import 'opportunities/opportunities_screen.dart';
 
 class MainWrapperScreen extends StatefulWidget {
   const MainWrapperScreen({Key? key}) : super(key: key);
@@ -21,34 +21,27 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
     const HomeScreen(),
     const ExploreScreen(),
     const RoadmapScreen(),
-    const ProgressScreen(),
-    const AIChatScreen(),
+    const OpportunitiesScreen(),
+    const ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withOpacity(0.05),
-              width: 1,
-            ),
-          ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(LucideIcons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(LucideIcons.search), label: 'Explore'),
-            BottomNavigationBarItem(icon: Icon(LucideIcons.map), label: 'Roadmap'),
-            BottomNavigationBarItem(icon: Icon(LucideIcons.barChart3), label: 'Progress'),
-            BottomNavigationBarItem(icon: Icon(LucideIcons.messageSquare), label: 'AI Chat'),
-          ],
-        ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(LucideIcons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.compass), label: 'Explore'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.map), label: 'Roadmap'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.briefcase), label: 'Jobs'),
+          BottomNavigationBarItem(icon: Icon(LucideIcons.user), label: 'Profile'),
+        ],
       ),
     );
   }

@@ -6,7 +6,6 @@ import '../../../data/providers/app_state_provider.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../widgets/gradient_button.dart';
 import '../../widgets/skill_chip.dart';
-import '../../widgets/glass_card.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -36,112 +35,118 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.topRight,
-            radius: 1.5,
-            colors: [
-              AppColors.primaryPurple.withOpacity(0.1),
-              AppColors.background,
-            ],
+    return Consumer<AppStateProvider>(
+      builder: (context, state, _) {
+        final isDark = state.isDarkMode;
+        
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.topRight,
+                radius: 1.5,
+                colors: [
+                  AppColors.primaryPurple.withOpacity(0.1),
+                  AppColors.background(isDark),
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Row(
+                      children: List.generate(5, (index) {
+                        return Expanded(
+                          child: Container(
+                            height: 4,
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                              color: index <= _currentPage
+                                  ? AppColors.primaryBlue
+                                  : AppColors.textMuted(isDark).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (page) => setState(() => _currentPage = page),
+                      children: [
+                        _buildBasicInfo(isDark),
+                        _buildSkillSelection(),
+                        _buildInterestSelection(),
+                        _buildPreferenceQuestions(isDark),
+                        _buildResumeUpload(isDark),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: GradientButton(
+                      text: _currentPage == 4 ? "Get Started" : "Continue",
+                      onPressed: _nextPage,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  children: List.generate(5, (index) {
-                    return Expanded(
-                      child: Container(
-                        height: 4,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: index <= _currentPage
-                              ? AppColors.primaryBlue
-                              : AppColors.textMuted.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: (page) => setState(() => _currentPage = page),
-                  children: [
-                    _buildBasicInfo(),
-                    _buildSkillSelection(),
-                    _buildInterestSelection(),
-                    _buildPreferenceQuestions(),
-                    _buildResumeUpload(),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: GradientButton(
-                  text: _currentPage == 4 ? "Get Started" : "Continue",
-                  onPressed: _nextPage,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildBasicInfo() {
+  Widget _buildBasicInfo(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          const Text(
+          Text(
             "Let's get to know you",
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.textPrimary(isDark),
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             "Tell us a bit about your academic background to personalize your experience.",
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+            style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 16),
           ),
           const SizedBox(height: 40),
-          _buildTextField("Full Name", _nameController, LucideIcons.user),
+          _buildTextField("Full Name", _nameController, LucideIcons.user, isDark),
           const SizedBox(height: 20),
-          _buildTextField("Branch / Major", _branchController, LucideIcons.bookOpen),
+          _buildTextField("Branch / Major", _branchController, LucideIcons.bookOpen, isDark),
           const SizedBox(height: 20),
-          _buildTextField("Current Year", _yearController, LucideIcons.calendar),
+          _buildTextField("Current Year", _yearController, LucideIcons.calendar, isDark),
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String hint, TextEditingController controller, IconData icon) {
+  Widget _buildTextField(String hint, TextEditingController controller, IconData icon, bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surface(isDark),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: AppColors.borderColor(isDark).withOpacity(0.5)),
       ),
       child: TextField(
         controller: controller,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: AppColors.textPrimary(isDark)),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(color: AppColors.textMuted),
+          hintStyle: TextStyle(color: AppColors.textMuted(isDark)),
           prefixIcon: Icon(icon, color: AppColors.primaryBlue, size: 20),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(18),
@@ -160,20 +165,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildSkillSelection() {
     return Consumer<AppStateProvider>(
       builder: (context, state, _) {
+        final isDark = state.isDarkMode;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "Your Skills",
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark)),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Select skills you already have. This helps us calculate your match score.",
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 16),
               ),
               const SizedBox(height: 30),
               Expanded(
@@ -202,20 +208,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildInterestSelection() {
     return Consumer<AppStateProvider>(
       builder: (context, state, _) {
+        final isDark = state.isDarkMode;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "What interests you?",
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark)),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Pick areas you'd like to explore in your career.",
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 16),
               ),
               const SizedBox(height: 30),
               Expanded(
@@ -234,10 +241,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onTap: () => state.toggleInterest(interest),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primaryPurple.withOpacity(0.2) : AppColors.surface,
+                          color: isSelected ? AppColors.primaryPurple.withOpacity(0.2) : AppColors.surface(isDark),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSelected ? AppColors.primaryPurple : Colors.white.withOpacity(0.05),
+                            color: isSelected ? AppColors.primaryPurple : AppColors.borderColor(isDark).withOpacity(0.5),
                           ),
                         ),
                         child: Center(
@@ -245,7 +252,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             interest,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : AppColors.textSecondary,
+                              color: isSelected ? AppColors.primaryPurple : AppColors.textSecondary(isDark),
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
@@ -262,36 +269,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildPreferenceQuestions() {
+  Widget _buildPreferenceQuestions(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          const Text(
+          Text(
             "Quick Preferences",
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark)),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             "Help us refine your matches with these quick questions.",
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+            style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 16),
           ),
           const SizedBox(height: 40),
-          _buildQuestionCard("How much do you enjoy coding?", ["Love it", "It's okay", "Not for me"]),
+          _buildQuestionCard("How much do you enjoy coding?", ["Love it", "It's okay", "Not for me"], isDark),
           const SizedBox(height: 24),
-          _buildQuestionCard("How comfortable are you with Math?", ["Expert", "Competent", "Beginner"]),
+          _buildQuestionCard("How comfortable are you with Math?", ["Expert", "Competent", "Beginner"], isDark),
         ],
       ),
     );
   }
 
-  Widget _buildQuestionCard(String question, List<String> options) {
+  Widget _buildQuestionCard(String question, List<String> options, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(question, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+        Text(question, style: TextStyle(color: AppColors.textPrimary(isDark), fontSize: 18, fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
         Row(
           children: options.map((opt) {
@@ -300,11 +307,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 margin: const EdgeInsets.only(right: 8),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.surface(isDark),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  border: Border.all(color: AppColors.borderColor(isDark).withOpacity(0.5)),
                 ),
-                child: Center(child: Text(opt, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))),
+                child: Center(child: Text(opt, style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 12))),
               ),
             );
           }).toList(),
@@ -313,7 +320,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildResumeUpload() {
+  Widget _buildResumeUpload(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
@@ -322,23 +329,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           const Icon(LucideIcons.fileUp, size: 80, color: AppColors.primaryBlue),
           const SizedBox(height: 30),
-          const Text(
+          Text(
             "Upload your Resume",
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark)),
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             "Optional: We can extract skills automatically from your PDF or Word document.",
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+            style: TextStyle(color: AppColors.textSecondary(isDark), fontSize: 16),
           ),
           const SizedBox(height: 40),
           Container(
             padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.surface(isDark),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3), style: BorderStyle.none),
+              border: Border.all(color: AppColors.primaryBlue.withOpacity(0.3)),
             ),
             child: const Column(
               children: [
