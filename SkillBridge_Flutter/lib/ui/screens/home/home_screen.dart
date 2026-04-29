@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../data/providers/app_state_provider.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/theme_toggle.dart';
+import '../quiz/quiz_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -162,32 +163,17 @@ class HomeScreen extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: _buildActionBtn(LucideIcons.helpCircle, "Take Quiz", isDark, () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const QuizScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => QuizScreen()));
         })),
         const SizedBox(width: 12),
         Expanded(child: _buildActionBtn(LucideIcons.bookOpen, "Skills", isDark, () {
-          // Navigate to Profile tab (index 4)
-          // Since I can't easily trigger parent state from here without a controller, 
-          // I'll show a quick dialog for now to simulate "Update Skills"
           _showDummyDialog(context, "Update Skills", "Skill management will open here.");
         })),
         const SizedBox(width: 12),
         Expanded(child: _buildActionBtn(LucideIcons.map, "Roadmap", isDark, () {
-          // In a real app, this would switch the BottomNav index to 2
           _showDummyDialog(context, "Your Roadmap", "Switching to your active learning path.");
         })),
       ],
-    );
-  }
-
-  void _showDummyDialog(BuildContext context, String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
-      ),
     );
   }
 
@@ -208,6 +194,17 @@ class HomeScreen extends StatelessWidget {
             Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.textPrimary(isDark))),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDummyDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
       ),
     );
   }

@@ -28,7 +28,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 _buildQuizShortcut(context, isDark),
                 const SizedBox(height: 30),
-                _buildSettingsSection(state, isDark),
+                _buildSettingsSection(context, state, isDark),
                 const SizedBox(height: 40),
                 _buildLogoutBtn(state),
               ],
@@ -95,7 +95,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsSection(AppStateProvider state, bool isDark) {
+  Widget _buildSettingsSection(BuildContext context, AppStateProvider state, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

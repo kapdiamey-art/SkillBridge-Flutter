@@ -23,7 +23,7 @@ class OpportunitiesScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             itemCount: 5,
             itemBuilder: (context, index) {
-              return _buildOpportunityCard(index, isDark);
+              return _buildOpportunityCard(context, index, isDark);
             },
           ),
         );
@@ -31,7 +31,7 @@ class OpportunitiesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOpportunityCard(int index, bool isDark) {
+  Widget _buildOpportunityCard(BuildContext context, int index, bool isDark) {
     final roles = ["Frontend Intern", "Product Designer", "Flutter Developer", "Data Analyst", "UI Engineer"];
     final companies = ["Google", "Notion", "Linear", "Airbnb", "Slack"];
     
