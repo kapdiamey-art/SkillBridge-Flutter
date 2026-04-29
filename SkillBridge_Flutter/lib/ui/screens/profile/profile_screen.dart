@@ -45,9 +45,10 @@ class ProfileScreen extends StatelessWidget {
         Stack(
           alignment: Alignment.bottomRight,
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=amey'),
+              backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+              child: const Text("A", style: TextStyle(color: AppColors.primaryBlue, fontSize: 32, fontWeight: FontWeight.bold)),
             ),
             Container(
               padding: const EdgeInsets.all(4),
@@ -100,19 +101,19 @@ class ProfileScreen extends StatelessWidget {
       children: [
         Text("Settings", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
         const SizedBox(height: 16),
-        _buildSettingTile("Dark Mode", LucideIcons.moon, isDark, trailing: Switch(
+        _buildSettingTile(context, "Dark Mode", LucideIcons.moon, isDark, trailing: Switch(
           value: state.isDarkMode,
           onChanged: (_) => state.toggleTheme(),
           activeColor: AppColors.primaryBlue,
         )),
-        _buildSettingTile("Notification Preferences", LucideIcons.bell, isDark),
-        _buildSettingTile("Security & Privacy", LucideIcons.shield, isDark),
-        _buildSettingTile("Help & Support", LucideIcons.helpCircle, isDark),
+        _buildSettingTile(context, "Notification Preferences", LucideIcons.bell, isDark),
+        _buildSettingTile(context, "Security & Privacy", LucideIcons.shield, isDark),
+        _buildSettingTile(context, "Help & Support", LucideIcons.helpCircle, isDark),
       ],
     );
   }
 
-  Widget _buildSettingTile(String title, IconData icon, bool isDark, {Widget? trailing}) {
+  Widget _buildSettingTile(BuildContext context, String title, IconData icon, bool isDark, {Widget? trailing}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -126,6 +127,18 @@ class ProfileScreen extends StatelessWidget {
         leading: Icon(icon, color: AppColors.primaryBlue),
         title: Text(title, style: TextStyle(color: AppColors.textPrimary(isDark), fontWeight: FontWeight.w600)),
         trailing: trailing ?? Icon(LucideIcons.chevronRight, size: 16, color: AppColors.textMuted(isDark)),
+        onTap: trailing == null ? () => _showDummyDialog(context, title, "$title settings will be available in the next update.") : null,
+      ),
+    );
+  }
+
+  void _showDummyDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
       ),
     );
   }

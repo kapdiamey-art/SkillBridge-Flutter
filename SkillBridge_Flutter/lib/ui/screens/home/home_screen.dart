@@ -18,14 +18,15 @@ class HomeScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: const Text("Career Compass"),
-            actions: const [
-              ThemeToggle(),
-              SizedBox(width: 8),
+            actions: [
+              const ThemeToggle(),
+              const SizedBox(width: 8),
               CircleAvatar(
                 radius: 16,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=amey'),
+                backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+                child: const Text("A", style: TextStyle(color: AppColors.primaryBlue, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
             ],
           ),
           body: SingleChildScrollView(
@@ -160,12 +161,33 @@ class HomeScreen extends StatelessWidget {
   Widget _buildQuickActions(BuildContext context, bool isDark) {
     return Row(
       children: [
-        Expanded(child: _buildActionBtn(LucideIcons.helpCircle, "Take Quiz", isDark, () {})),
+        Expanded(child: _buildActionBtn(LucideIcons.helpCircle, "Take Quiz", isDark, () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const QuizScreen()));
+        })),
         const SizedBox(width: 12),
-        Expanded(child: _buildActionBtn(LucideIcons.bookOpen, "Skills", isDark, () {})),
+        Expanded(child: _buildActionBtn(LucideIcons.bookOpen, "Skills", isDark, () {
+          // Navigate to Profile tab (index 4)
+          // Since I can't easily trigger parent state from here without a controller, 
+          // I'll show a quick dialog for now to simulate "Update Skills"
+          _showDummyDialog(context, "Update Skills", "Skill management will open here.");
+        })),
         const SizedBox(width: 12),
-        Expanded(child: _buildActionBtn(LucideIcons.map, "Roadmap", isDark, () {})),
+        Expanded(child: _buildActionBtn(LucideIcons.map, "Roadmap", isDark, () {
+          // In a real app, this would switch the BottomNav index to 2
+          _showDummyDialog(context, "Your Roadmap", "Switching to your active learning path.");
+        })),
       ],
+    );
+  }
+
+  void _showDummyDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
+      ),
     );
   }
 

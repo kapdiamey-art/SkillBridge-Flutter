@@ -35,53 +35,67 @@ class OpportunitiesScreen extends StatelessWidget {
     final roles = ["Frontend Intern", "Product Designer", "Flutter Developer", "Data Analyst", "UI Engineer"];
     final companies = ["Google", "Notion", "Linear", "Airbnb", "Slack"];
     
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg(isDark),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderColor(isDark)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(roles[index], style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
-              const Icon(LucideIcons.bookmark, size: 20, color: AppColors.primaryBlue),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(companies[index], style: const TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 14)),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildTag("Remote", isDark),
-              const SizedBox(width: 8),
-              _buildTag("Paid", isDark),
-              const SizedBox(width: 8),
-              _buildTag("Internship", isDark),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("\$2k - \$5k / mo", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    return GestureDetector(
+      onTap: () => _showDummyDialog(context, roles[index], "Company: ${companies[index]}\nLocation: Remote\nType: Full-time\n\nDetailed job description and requirements will be displayed here."),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.cardBg(isDark),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.borderColor(isDark)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(roles[index], style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+                const Icon(LucideIcons.bookmark, size: 20, color: AppColors.primaryBlue),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(companies[index], style: const TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _buildTag("Remote", isDark),
+                const SizedBox(width: 8),
+                _buildTag("Paid", isDark),
+                const SizedBox(width: 8),
+                _buildTag("Internship", isDark),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("\$2k - \$5k / mo", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary(isDark))),
+                ElevatedButton(
+                  onPressed: () => _showDummyDialog(context, "Apply for ${roles[index]}", "Your application has been sent to ${companies[index]}!"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text("Apply", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
-                child: const Text("Apply", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDummyDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
       ),
     );
   }
